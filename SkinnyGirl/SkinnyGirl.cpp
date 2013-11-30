@@ -10,37 +10,6 @@ int threadMinCount = 1;
 int threadMaxCount = 1;
 int threadLifeTime = 1488;
 int len;
-int _tmain(int argc, char* argv[])// min max lifetime
-{
-	_splitpath(argv[0],NULL,NULL,programName,NULL);
-	if(argc != 4)
-    {
-        fprintf(stderr, "%s: Programm takes 3 arguments: minCount, maxCount and lifeTime\n", programName);
-        return 1;
-    }
-    threadMinCount = strtol(argv[argc - 3], NULL, 0);
-    threadMaxCount = strtol(argv[argc - 2], NULL, 0);
-	threadLifeTime = strtol(argv[argc - 1], NULL, 0);
-    if(threadMinCount <= 0 || threadMaxCount <= 0 || threadLifeTime <= 0)
-    {
-        fprintf(stderr, "%s: Invalid count argument!\n", programName);
-        return 1;
-    }
-	MyThreadPool pool = MyThreadPool(threadMinCount,threadMaxCount,threadLifeTime);
-	char* command;
-	std::string strcommand;
-	std::vector<std::string> vParsedString;
-	while (1)
-	{
-		gets(command);
-		if (command == "Exit")
-			break;
-		strcommand = std::string(command);
-		split(strcommand, vParsedString,' ');
-		pool.GiveTask(vParsedString);
-	}
-	return 0;
-}
 
 unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
 {
@@ -59,9 +28,42 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
     }
 
     // Add the last one
-    tempvect.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+    tempvect.push_back( txt.substr( initialPos, min( pos, txt.size() ) - initialPos + 1 ) );
 	for (int i = 0; i< tempvect.size(); i++)
-		if (tempvect[i].data != "")
+		if (tempvect[i].data() != "")
 			strs.push_back(tempvect[i]);
     return strs.size();
 }
+
+int _tmain(int argc, char* argv[])// min max lifetime
+{
+	_splitpath(argv[0],NULL,NULL,programName,NULL);
+	if(argc != 4)
+    {
+        fprintf(stderr, "%s: Programm takes 3 arguments: minCount, maxCount and lifeTime\n", programName);
+        return 1;
+    }
+    threadMinCount = strtol(argv[argc - 3], NULL, 0);
+    threadMaxCount = strtol(argv[argc - 2], NULL, 0);
+	threadLifeTime = strtol(argv[argc - 1], NULL, 0);
+    if(threadMinCount <= 0 || threadMaxCount <= 0 || threadLifeTime <= 0)
+    {
+        fprintf(stderr, "%s: Invalid count argument!\n", programName);
+        return 1;
+    }
+	//MyThreadPool pool = MyThreadPool(threadMinCount,threadMaxCount,threadLifeTime);
+	char* command;
+	std::string strcommand;
+	std::vector<std::string> vParsedString;
+	while (1)
+	{
+		gets(command);
+		if (command == "Exit")
+			break;
+		strcommand = std::string(command);
+		split(strcommand, vParsedString,' ');
+		//pool.GiveTask(vParsedString);
+	}
+	return 0;
+}
+

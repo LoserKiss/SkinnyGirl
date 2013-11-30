@@ -27,5 +27,3 @@
 typedef std::function<void()> fn_type;
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
 #include "DLLManager.h"
-#include "Worker.h"
-#include "ThreadPool.h"

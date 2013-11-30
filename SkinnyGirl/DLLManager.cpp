@@ -19,7 +19,7 @@ int DLLManager::LoadDLL(void)
     {
         do
         {
-          if(".dll" == strlwr((char *) PathFindExtension(wfd.cFileName)))//))00
+          if(".dll" == _strlwr((char *) PathFindExtension(wfd.cFileName)))//))00
 		  {
 			  HINSTANCE hDllInstance = LoadLibraryEx( wfd.cFileName, 0, DONT_RESOLVE_DLL_REFERENCES );
 			  loadedDLLVect.push_back(hDllInstance);
