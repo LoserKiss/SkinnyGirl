@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkinnyGirl", "SkinnyGirl\SkinnyGirl.vcxproj", "{3EBF73B1-F3F8-4382-9B66-581CEDCD6EAB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D4E61046-87F9-4776-87EF-5FC78819345D} = {D4E61046-87F9-4776-87EF-5FC78819345D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThreadPoolLib", "ThreadPoolLib\ThreadPoolLib.vcxproj", "{D4E61046-87F9-4776-87EF-5FC78819345D}"
 EndProject

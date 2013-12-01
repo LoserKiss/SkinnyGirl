@@ -15,6 +15,8 @@ public:
 		InitializeCriticalSection(&workerscs);	
 		thr_deleter_fn_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_deleter_fn, (LPVOID)this, 0, NULL);
 		thr_manager_fn_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_manager_fn, (LPVOID)this, 0, NULL);
+		notNullTasksQueueEvent = ::CreateEvent(NULL,TRUE,//без
+			FALSE,NULL);
 	}
     ~ThreadPool() 
 	{
@@ -26,8 +28,14 @@ public:
 	}
 	void AddTask(LPVOID fn, std::vector<LPVOID> params)
 	{
+		bool isempty;
 		EnterCriticalSection(&taskscs);
+		isempty = tasks.empty();
 		tasks.push(std::bind(fn,params));
+		if (isempty)
+		{
+			SetEvent(notNullTasksQueueEvent);
+		}
 		LeaveCriticalSection(&taskscs);
 	}
 private:
@@ -67,13 +75,15 @@ private:
 		while(pool->active)
 		{
 			isallwork = false;
-			Sleep(500);//плохое решение
+			Sleep(100);//плохое решение
+			::WaitForSingleObject(pool->notNullTasksQueueEvent,INFINITE);
 			while (!isallwork)
 			{
 				EnterCriticalSection(&pool->taskscs);
 				if (pool->tasks.empty())
 				{
 					isallwork = true;
+					ResetEvent(pool->notNullTasksQueueEvent);
 					break;
 				}
 				LeaveCriticalSection(&pool->taskscs);
@@ -107,7 +117,7 @@ private:
 	CRITICAL_SECTION workerscs;
     std::vector<Worker*> workers; 
 	CRITICAL_SECTION taskscs;
+	HANDLE notNullTasksQueueEvent;
 	std::queue<fn_type> tasks; 
-
 };
 

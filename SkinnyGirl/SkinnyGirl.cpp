@@ -1,10 +1,7 @@
 // SkinnyGirl.cpp: определяет точку входа для консольного приложения.
 //
-
 #include "stdafx.h"
-#define LIMIT 4096
 char *programName;
-int procCount = 0;
 char *bufBytes;
 int threadMinCount = 1;
 int threadMaxCount = 1;
@@ -37,7 +34,7 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 
 int _tmain(int argc, char* argv[])// min max lifetime
 {
-	_splitpath(argv[0],NULL,NULL,programName,NULL);
+	//_splitpath(argv[0],NULL,NULL,programName,NULL);
 	if(argc != 4)
     {
         fprintf(stderr, "%s: Programm takes 3 arguments: minCount, maxCount and lifeTime\n", programName);
@@ -52,12 +49,12 @@ int _tmain(int argc, char* argv[])// min max lifetime
         return 1;
     }
 	//MyThreadPool pool = MyThreadPool(threadMinCount,threadMaxCount,threadLifeTime);
-	char* command;
+	char* command = (char*)malloc(sizeof(char) * MAXSIZE_T);
 	std::string strcommand;
 	std::vector<std::string> vParsedString;
 	while (1)
 	{
-		gets(command);
+		gets_s(command, MAXSIZE_T);
 		if (command == "Exit")
 			break;
 		strcommand = std::string(command);
