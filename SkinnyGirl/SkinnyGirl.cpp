@@ -1,7 +1,6 @@
 // SkinnyGirl.cpp: определяет точку входа для консольного приложения.
 //
 #include "stdafx.h"
-char *programName;
 char *bufBytes;
 int threadMinCount = 1;
 int threadMaxCount = 1;
@@ -31,13 +30,12 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 			strs.push_back(tempvect[i]);
     return strs.size();
 }
-
+#pragma warning(disable : 4996)
 int _tmain(int argc, char* argv[])// min max lifetime
 {
-	//_splitpath(argv[0],NULL,NULL,programName,NULL);
 	if(argc != 4)
     {
-        fprintf(stderr, "%s: Programm takes 3 arguments: minCount, maxCount and lifeTime\n", programName);
+        fprintf(stderr, "Programm takes 3 arguments: minCount, maxCount and lifeTime\n");
         return 1;
     }
     threadMinCount = strtol(argv[argc - 3], NULL, 0);
@@ -45,7 +43,7 @@ int _tmain(int argc, char* argv[])// min max lifetime
 	threadLifeTime = strtol(argv[argc - 1], NULL, 0);
     if(threadMinCount <= 0 || threadMaxCount <= 0 || threadLifeTime <= 0)
     {
-        fprintf(stderr, "%s: Invalid count argument!\n", programName);
+        fprintf(stderr, "Invalid count argument!\n");
         return 1;
     }
 	//MyThreadPool pool = MyThreadPool(threadMinCount,threadMaxCount,threadLifeTime);

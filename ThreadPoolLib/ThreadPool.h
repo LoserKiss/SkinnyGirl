@@ -1,9 +1,13 @@
 #pragma once
 #include "stdafx.h"
-class ThreadPool
+#ifdef THREADPOOLLIB_EXPORTS
+#define THREADPOOLLIB_API __declspec(dllexport) 
+#else
+#define THREADPOOLLIB_API __declspec(dllimport) 
+#endif
+ class THREADPOOLLIB_API ThreadPool
 {
 public:
-
 	public:
     ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime)
 		:tasks(),workers(),active(true)
