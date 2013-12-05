@@ -3,7 +3,7 @@
 class DLLManager
 {
 public:
-	void* GetFuncAdress(std::string name);
+	DLLFUNC GetFuncAdress(std::string name);
 	int LoadDLL(void);
 	DLLManager(void);
 	~DLLManager(void);

@@ -8,7 +8,6 @@
 #include "targetver.h"
 
 #define WIN32_LEAN_AND_MEAN             // Исключите редко используемые компоненты из заголовков Windows
-// Файлы заголовков Windows:
 #include "targetver.h"
 #include <iostream>
 #include <stdio.h>
@@ -29,8 +28,6 @@
 #include <memory>
 #include <condition_variable>
 typedef std::function<void()> fn_type;
-#include "Worker.h"
-
-
-
+typedef void (*DLLFUNC)(LPVOID,LPVOID);
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
+#include "Worker.h"

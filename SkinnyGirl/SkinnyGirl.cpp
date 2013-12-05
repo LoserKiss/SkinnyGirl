@@ -4,10 +4,10 @@
 char *bufBytes;
 int threadMinCount = 1;
 int threadMaxCount = 1;
-int threadLifeTime = 1488;
+int threadLifeTime = 5555;
 int len;
 
-unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
+unsigned int split(const std::string &txt, std::vector<std::string> &strs , char ch)
 {
     unsigned int pos = txt.find( ch );
     unsigned int initialPos = 0;
@@ -38,27 +38,44 @@ int _tmain(int argc, char* argv[])// min max lifetime
         fprintf(stderr, "Programm takes 3 arguments: minCount, maxCount and lifeTime\n");
         return 1;
     }
-    threadMinCount = strtol(argv[argc - 3], NULL, 0);
-    threadMaxCount = strtol(argv[argc - 2], NULL, 0);
-	threadLifeTime = strtol(argv[argc - 1], NULL, 0);
+    threadMinCount = atoi(argv[argc - 3]);
+    threadMaxCount = atoi(argv[argc - 2]);
+	threadLifeTime = atoi(argv[argc - 1]);
     if(threadMinCount <= 0 || threadMaxCount <= 0 || threadLifeTime <= 0)
     {
         fprintf(stderr, "Invalid count argument!\n");
         return 1;
     }
-	//MyThreadPool pool = MyThreadPool(threadMinCount,threadMaxCount,threadLifeTime);
-	char* command = (char*)malloc(sizeof(char) * MAXSIZE_T);
+	ThreadPool* pool = new ThreadPool(threadMinCount,threadMaxCount,threadLifeTime);
+	DLLManager man = DLLManager();
+	man.LoadDLL();
+	DLLFUNC fn;
+	char* command = (char*)malloc(sizeof(char) * 100);
 	std::string strcommand;
 	std::vector<std::string> vParsedString;
 	while (1)
 	{
 		gets_s(command, MAXSIZE_T);
 		if (command == "Exit")
+		{
+			Exit(&pool);
 			break;
+		}
 		strcommand = std::string(command);
 		split(strcommand, vParsedString,' ');
-		//pool.GiveTask(vParsedString);
+		if (vParsedString.size() == 0)
+		{
+			std::cout << "Nothing is here :(\n";
+			continue;
+		}
+		fn = man.GetFuncAdress(vParsedString[0]);
+		if (fn == NULL)
+		{
+			std::cout << "There is no such function :(\n";
+			continue;
+		}
+		vParsedString.erase(vParsedString.begin());
+		pool->AddTask(fn,&vParsedString);
 	}
 	return 0;
 }
-

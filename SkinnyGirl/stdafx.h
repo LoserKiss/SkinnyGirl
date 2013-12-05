@@ -25,5 +25,7 @@
 #include <memory>
 #include <condition_variable>
 typedef std::function<void()> fn_type;
+typedef void (*DLLFUNC)(LPVOID,LPVOID);
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
 #include "DLLManager.h"
+#include "ThreadPool.h"

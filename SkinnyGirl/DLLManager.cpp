@@ -10,10 +10,8 @@ DLLManager::~DLLManager(void)
 int DLLManager::LoadDLL(void)
 {
 	WIN32_FIND_DATAW wfd;
- 
 	LPWSTR name = new WCHAR[MAX_PATH];
-	GetModuleFileName(GetModuleHandle(0),(LPWSTR) name, MAX_PATH);
-	//PathRemoveFileSpec(name);
+	GetCurrentDirectory(MAX_PATH,name);
     HANDLE const hFind = FindFirstFileW(name, &wfd);
 	std::string ext;
 	char* vasya = new char[MAX_PATH];
@@ -35,12 +33,12 @@ int DLLManager::LoadDLL(void)
     }
 	return 0;
 }
-void* DLLManager::GetFuncAdress(std::string name)
+DLLFUNC DLLManager::GetFuncAdress(std::string name)
 {
-	void* adr;
+	DLLFUNC adr;
 	for(int i = 0; i < loadedDLLVect.size(); i++)
 	{
-		if ((adr = GetProcAddress(loadedDLLVect[i],name.data())) != NULL)
+		if ((adr =(DLLFUNC) GetProcAddress(loadedDLLVect[i],name.data())) != NULL)
 			return adr;
 	}
 	return NULL;
