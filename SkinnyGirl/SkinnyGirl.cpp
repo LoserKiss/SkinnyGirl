@@ -6,18 +6,26 @@ int threadMinCount = 1;
 int threadMaxCount = 1;
 int threadLifeTime = 5555;
 int len;
+#pragma warning(disable : 4996)
+ wchar_t *GetWC(const char *c)
+{
+     size_t cSize = strlen(c)+1;
+    wchar_t* wc = new wchar_t[cSize];
+    mbstowcs (wc, c, cSize);
 
-unsigned int split(const std::string &txt, std::vector<std::string> &strs , char ch)
+    return wc;
+}
+unsigned int split(const std::wstring &txt, std::vector<std::wstring> &strs , char ch)
 {
     unsigned int pos = txt.find( ch );
     unsigned int initialPos = 0;
-	std::vector<std::string> tempvect;
+	std::vector<std::wstring> tempvect;
 	tempvect.clear();
     strs.clear();
 
     // Decompose statement
-    while( pos != std::string::npos ) {
-        tempvect.push_back( txt.substr( initialPos, pos - initialPos + 1 ) );
+    while( pos != std::wstring::npos ) {
+        tempvect.push_back( txt.substr( initialPos, pos - initialPos  ) );
         initialPos = pos + 1;
 
         pos = txt.find( ch, initialPos );
@@ -26,13 +34,14 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs , char
     // Add the last one
     tempvect.push_back( txt.substr( initialPos, min( pos, txt.size() ) - initialPos + 1 ) );
 	for (int i = 0; i< tempvect.size(); i++)
-		if (tempvect[i].data() != "")
+		if (tempvect[i].data() != L"")
 			strs.push_back(tempvect[i]);
     return strs.size();
 }
 #pragma warning(disable : 4996)
 int _tmain(int argc, char* argv[])// min max lifetime
 {
+	fprintf(stdout,"Welcome to my Thread pool\n");
 	if(argc != 4)
     {
         fprintf(stderr, "Programm takes 3 arguments: minCount, maxCount and lifeTime\n");
@@ -51,17 +60,18 @@ int _tmain(int argc, char* argv[])// min max lifetime
 	man.LoadDLL();
 	DLLFUNC fn;
 	char* command = (char*)malloc(sizeof(char) * 100);
-	std::string strcommand;
-	std::vector<std::string> vParsedString;
+	std::wstring strcommand;
+	std::vector<std::wstring> vParsedString;
 	while (1)
 	{
 		gets_s(command, MAXSIZE_T);
-		if (command == "Exit")
+
+		strcommand = std::wstring(GetWC(command));
+		if (!strcmp(command,"Exit"))
 		{
 			Exit(&pool);
 			break;
 		}
-		strcommand = std::string(command);
 		split(strcommand, vParsedString,' ');
 		if (vParsedString.size() == 0)
 		{

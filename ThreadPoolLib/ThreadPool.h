@@ -1,19 +1,21 @@
 #pragma once
 #include "stdafx.h"
 #include "Worker.h"
-class  ThreadPool
+ class  ThreadPool
 {
 public:
 	public:
     ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime);
     ~ThreadPool() ;
-	void AddTask(DLLFUNC fn, std::vector<std::string> *params);
+	void AddTask(DLLFUNC fn, std::vector<std::wstring> *params);
 	int WorkersCount(int* working, int* resting);
+	int Vasya();
 private:
+	bool active;
 	size_t minthreads;
 	size_t maxthreads;
 	size_t lifetime;
-	bool active;
+	
 	HANDLE thr_deleter_fn_handle;
 	HANDLE thr_manager_fn_handle;
 	static void thread_deleter_fn(LPVOID param);

@@ -5,7 +5,7 @@ class Worker
 public:
 
     Worker()
-		:enabled(true)
+		:enabled(true),isworking(false)
     {
 		lasttime = GetTickCount64();
 		thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_fn, (LPVOID)this, 0, NULL);
@@ -18,7 +18,8 @@ public:
     ~Worker()
     {
 		EnterCriticalSection(&cs);
-			enabled = false;
+		enabled = false;
+		isworking = false;
 		LeaveCriticalSection(&cs);
 		SetEvent(awaker);
 		::WaitForSingleObject(thread,INFINITE);

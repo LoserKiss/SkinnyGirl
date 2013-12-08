@@ -12,7 +12,11 @@ int DLLManager::LoadDLL(void)
 	WIN32_FIND_DATAW wfd;
 	LPWSTR name = new WCHAR[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH,name);
-    HANDLE const hFind = FindFirstFileW(name, &wfd);
+	name = wcscat(name, L"\\*");
+	//GetModuleFileName(GetModuleHandle(0),(LPWSTR) name, MAX_PATH);
+	//std::string vasya = std::string(name):
+
+	HANDLE  hFind = FindFirstFileW(name, &wfd);
 	std::string ext;
 	char* vasya = new char[MAX_PATH];
     if (INVALID_HANDLE_VALUE != hFind)
@@ -22,23 +26,29 @@ int DLLManager::LoadDLL(void)
 			std::wcstombs(vasya,wfd.cFileName,MAX_PATH);
 			vasya = strlwr(vasya);
 			ext = vasya;
-			if(".dll" == ext.substr(ext.find_last_of(".")).data())//))00
-		  {
-			  HINSTANCE hDllInstance = LoadLibraryEx( wfd.cFileName, 0, DONT_RESOLVE_DLL_REFERENCES );
-			  loadedDLLVect.push_back(hDllInstance);
-		  }
+			if (ext.find(".") != std::string::npos)
+			{
+				ext = ext.substr(ext.find_last_of("."));
+				if(!strcmp(const_cast<char*>(ext.data()),".dll") )//))00
+					{
+						HINSTANCE hDllInstance = LoadLibrary( wfd.cFileName );
+						loadedDLLVect.push_back(hDllInstance);
+					}
+			}
         } while (NULL != FindNextFileW(hFind, &wfd));
  
         FindClose(hFind);
     }
 	return 0;
 }
-DLLFUNC DLLManager::GetFuncAdress(std::string name)
+DLLFUNC DLLManager::GetFuncAdress(std::wstring name)
 {
 	DLLFUNC adr;
+	char* vasya = new char[name.size()];
 	for(int i = 0; i < loadedDLLVect.size(); i++)
 	{
-		if ((adr =(DLLFUNC) GetProcAddress(loadedDLLVect[i],name.data())) != NULL)
+		wcstombs (vasya, name.data(),name.size()+1);
+		if ((adr = (DLLFUNC) GetProcAddress(loadedDLLVect[i],vasya)) != NULL)
 			return adr;
 	}
 	return NULL;

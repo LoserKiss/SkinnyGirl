@@ -33,7 +33,7 @@ void ThreadPool::thread_manager_fn(LPVOID param)
 	while(pool->active)
 	{
 		isallwork = false;
-		Sleep(100);//плохое решение
+		Sleep(pool->lifetime);//плохое решение
 		::WaitForSingleObject(pool->notNullTasksQueueEvent,INFINITE);
 		while (!isallwork)
 		{
@@ -42,12 +42,17 @@ void ThreadPool::thread_manager_fn(LPVOID param)
 			{
 				isallwork = true;
 				ResetEvent(pool->notNullTasksQueueEvent);
+				LeaveCriticalSection(&pool->taskscs);
 				break;
 			}
-			LeaveCriticalSection(&pool->taskscs);
-			EnterCriticalSection(&pool->taskscs);
+			//LeaveCriticalSection(&pool->taskscs);
+			//EnterCriticalSection(&pool->taskscs);
 			task = pool->tasks.front();
 			pool->tasks.pop();
+			if (pool->tasks.size() == 0)
+			{
+				ResetEvent(pool->notNullTasksQueueEvent);
+			}
 			LeaveCriticalSection(&pool->taskscs);
 			EnterCriticalSection(&pool->workerscs);
 			foundfreeworker = false;
@@ -79,9 +84,9 @@ void ThreadPool::thread_deleter_fn(LPVOID param)
 		
 	while(pool->active)
 	{
-		Sleep(pool->lifetime);
-		DWORD curTime = GetTickCount64();
+		Sleep(100);
 		EnterCriticalSection(&pool->workerscs);
+		DWORD curTime = GetTickCount64();
 		if (pool->workers.size() > pool->minthreads)
 		{
 			for (int i = 0; i < pool->workers.size();pool++)
@@ -95,12 +100,13 @@ void ThreadPool::thread_deleter_fn(LPVOID param)
 	}
 }
 
-void ThreadPool::AddTask(DLLFUNC fn, std::vector<std::string> *params)
+void ThreadPool::AddTask(DLLFUNC fn, std::vector<std::wstring> *params)
 {
 	bool isempty;
 	EnterCriticalSection(&taskscs);
 	isempty = tasks.empty();
 	std::function<void()> f = std::function<void()>(std::bind(fn,(LPVOID)this,(LPVOID) params));
+	tasks.push(f);
 	if (isempty)
 	{
 		SetEvent(notNullTasksQueueEvent);
@@ -122,8 +128,11 @@ int ThreadPool::WorkersCount(int* working, int* resting)
 	return *working + *resting;
 }
 
-
+int ThreadPool::Vasya()
+{
+	return 228;
+}
 void Exit(ThreadPool** thrplpt)
 {
-	delete &thrplpt;
+	exit(1);
 }
