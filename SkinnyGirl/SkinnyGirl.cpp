@@ -39,7 +39,7 @@ unsigned int split(const std::wstring &txt, std::vector<std::wstring> &strs , ch
     return strs.size();
 }
 #pragma warning(disable : 4996)
-int _tmain(int argc, char* argv[])// min max lifetime
+int main(int argc, char *argv[])// min max lifetime
 {
 	fprintf(stdout,"Welcome to my Thread pool\n");
 	if(argc != 4)
@@ -61,7 +61,7 @@ int _tmain(int argc, char* argv[])// min max lifetime
 	DLLFUNC fn;
 	char* command = (char*)malloc(sizeof(char) * 100);
 	std::wstring strcommand;
-	std::vector<std::wstring> vParsedString;
+	std::vector<std::wstring>* vParsedString;
 	while (1)
 	{
 		gets_s(command, MAXSIZE_T);
@@ -72,20 +72,21 @@ int _tmain(int argc, char* argv[])// min max lifetime
 			Exit(&pool);
 			break;
 		}
-		split(strcommand, vParsedString,' ');
-		if (vParsedString.size() == 0)
+		vParsedString = new std::vector<std::wstring>();
+		split(strcommand, *vParsedString,' ');
+		if ((vParsedString->size() == 1) &&(!wcscmp(vParsedString->at(0).data(),L"")))
 		{
 			std::cout << "Nothing is here :(\n";
 			continue;
 		}
-		fn = man.GetFuncAdress(vParsedString[0]);
+		fn = man.GetFuncAdress(vParsedString->at(0));
 		if (fn == NULL)
 		{
 			std::cout << "There is no such function :(\n";
 			continue;
 		}
-		vParsedString.erase(vParsedString.begin());
-		pool->AddTask(fn,&vParsedString);
+		vParsedString->erase(vParsedString->begin());
+		pool->AddTask(fn,vParsedString);
 	}
 	return 0;
 }

@@ -24,6 +24,8 @@ public:
 		SetEvent(awaker);
 		::WaitForSingleObject(thread,INFINITE);
 		DeleteCriticalSection(&cs);
+		CloseHandle(awaker);
+		CloseHandle(finishtask);
     }
 	DWORD GetLastFinishTime()
 	{
@@ -89,7 +91,9 @@ private:
 				ResetEvent(ths->finishtask);
 			LeaveCriticalSection(&ths->cs);
 			if (ths->task_field != NULL)
+			{
 				ths->task_field();
+			}
 			EnterCriticalSection(&ths->cs);
 				ths->lasttime = GetTickCount64();
 				ths->isworking = false;

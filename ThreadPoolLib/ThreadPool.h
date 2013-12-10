@@ -7,9 +7,8 @@ public:
 	public:
     ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime);
     ~ThreadPool() ;
-	void AddTask(DLLFUNC fn, std::vector<std::wstring> *params);
+	void AddTask(DLLFUNC fn, LPVOID params);
 	int WorkersCount(int* working, int* resting);
-	int Vasya();
 private:
 	bool active;
 	size_t minthreads;
@@ -23,7 +22,7 @@ private:
 	CRITICAL_SECTION workerscs;
     std::vector<Worker*> workers; 
 	CRITICAL_SECTION taskscs;
-	HANDLE notNullTasksQueueEvent;
+	//HANDLE notNullTasksQueueEvent;
 	std::queue<fn_type> tasks; 
 };
 

@@ -13,8 +13,6 @@ int DLLManager::LoadDLL(void)
 	LPWSTR name = new WCHAR[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH,name);
 	name = wcscat(name, L"\\*");
-	//GetModuleFileName(GetModuleHandle(0),(LPWSTR) name, MAX_PATH);
-	//std::string vasya = std::string(name):
 
 	HANDLE  hFind = FindFirstFileW(name, &wfd);
 	std::string ext;
@@ -36,7 +34,6 @@ int DLLManager::LoadDLL(void)
 					}
 			}
         } while (NULL != FindNextFileW(hFind, &wfd));
- 
         FindClose(hFind);
     }
 	return 0;

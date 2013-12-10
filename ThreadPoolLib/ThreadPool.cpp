@@ -12,8 +12,8 @@ ThreadPool::ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime)
 	InitializeCriticalSection(&workerscs);	
 	thr_deleter_fn_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_deleter_fn, (LPVOID)this, 0, NULL);
 	thr_manager_fn_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_manager_fn, (LPVOID)this, 0, NULL);
-	notNullTasksQueueEvent = ::CreateEvent(NULL,TRUE,//без
-		FALSE,NULL);
+	//notNullTasksQueueEvent = ::CreateEvent(NULL,TRUE,//без
+		//FALSE,NULL);
 }
 
 ThreadPool::~ThreadPool(void)
@@ -33,15 +33,15 @@ void ThreadPool::thread_manager_fn(LPVOID param)
 	while(pool->active)
 	{
 		isallwork = false;
-		Sleep(pool->lifetime);//плохое решение
-		::WaitForSingleObject(pool->notNullTasksQueueEvent,INFINITE);
+		Sleep(100);//плохое решение
+		//::WaitForSingleObject(pool->notNullTasksQueueEvent,INFINITE);
 		while (!isallwork)
 		{
 			EnterCriticalSection(&pool->taskscs);
 			if (pool->tasks.empty())
 			{
 				isallwork = true;
-				ResetEvent(pool->notNullTasksQueueEvent);
+				//ResetEvent(pool->notNullTasksQueueEvent);
 				LeaveCriticalSection(&pool->taskscs);
 				break;
 			}
@@ -51,7 +51,7 @@ void ThreadPool::thread_manager_fn(LPVOID param)
 			pool->tasks.pop();
 			if (pool->tasks.size() == 0)
 			{
-				ResetEvent(pool->notNullTasksQueueEvent);
+				//ResetEvent(pool->notNullTasksQueueEvent);
 			}
 			LeaveCriticalSection(&pool->taskscs);
 			EnterCriticalSection(&pool->workerscs);
@@ -89,7 +89,7 @@ void ThreadPool::thread_deleter_fn(LPVOID param)
 		DWORD curTime = GetTickCount64();
 		if (pool->workers.size() > pool->minthreads)
 		{
-			for (int i = 0; i < pool->workers.size();pool++)
+			for (int i = 0; i < pool->workers.size();i++)
 				if (!pool->workers[i]->IsWorking())
 					if (curTime - pool->workers[i]->GetLastFinishTime() > pool->lifetime)
 					{
@@ -100,17 +100,11 @@ void ThreadPool::thread_deleter_fn(LPVOID param)
 	}
 }
 
-void ThreadPool::AddTask(DLLFUNC fn, std::vector<std::wstring> *params)
+void ThreadPool::AddTask(DLLFUNC fn, LPVOID params)
 {
-	bool isempty;
 	EnterCriticalSection(&taskscs);
-	isempty = tasks.empty();
 	std::function<void()> f = std::function<void()>(std::bind(fn,(LPVOID)this,(LPVOID) params));
 	tasks.push(f);
-	if (isempty)
-	{
-		SetEvent(notNullTasksQueueEvent);
-	}
 	LeaveCriticalSection(&taskscs);
 }
 
@@ -128,10 +122,6 @@ int ThreadPool::WorkersCount(int* working, int* resting)
 	return *working + *resting;
 }
 
-int ThreadPool::Vasya()
-{
-	return 228;
-}
 void Exit(ThreadPool** thrplpt)
 {
 	exit(1);
