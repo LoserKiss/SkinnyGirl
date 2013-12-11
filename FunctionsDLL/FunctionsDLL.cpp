@@ -185,8 +185,6 @@ extern "C"
 		int64_t val;
 	};
 
-	int seteventscount = 0;
-	CRITICAL_SECTION cs;
 	void FolderSize(LPVOID poolarg, LPVOID vectargs)
 	{
 		ThreadPool* pool =(ThreadPool*) poolarg;
@@ -221,9 +219,6 @@ extern "C"
 		}
 		HANDLE eventik = (HANDLE) vect->at(2);
 		SetEvent(eventik);
-		EnterCriticalSection(&cs);
-		seteventscount++;
-		LeaveCriticalSection(&cs);
 		//delete pdir;
 		//delete vect;
 	}
@@ -297,7 +292,6 @@ extern "C"
 	}
 	void __declspec(dllexport) Size(LPVOID poolarg, LPVOID vectargs)
 	{
-		InitializeCriticalSection(&cs);
 		ThreadPool* pool =(ThreadPool*) poolarg;
 		std::vector<std::wstring>* vect = (std::vector<std::wstring>*) vectargs;
 		if (vect->size() != 1)
