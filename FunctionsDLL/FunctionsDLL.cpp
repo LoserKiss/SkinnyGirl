@@ -53,8 +53,10 @@ extern "C"
 		}
 		int working= 0;//просто так
 		int resting = 0;
-		pool->WorkersCount(&working,&resting);
-		std::cout<<"Working: "<<working<<" Resting: "<< resting <<"\n";
+		int tasks = 0;
+		pool->WorkersCount(&working,&resting, &tasks);
+		std::cout<<"Working: "<<working<<" Resting: "<< resting <<
+			" Tasks: "<< tasks << "\n";
 	}
 	#pragma warning(disable : 4996)
 	void __declspec(dllexport) Copy(LPVOID poolarg, LPVOID vectargs)
@@ -143,7 +145,6 @@ extern "C"
 		}
 		delete vect;
 	}
-
 	class DefendedInt64
 	{
 	public:
@@ -151,6 +152,7 @@ extern "C"
 		{
 			InitializeCriticalSection(&cs);
 			val = 0;
+			count = 0;
 		}
 		~DefendedInt64()
 		{
@@ -174,16 +176,25 @@ extern "C"
 		{
 			EnterCriticalSection(&cs);
 			val += value;
+			count++;
 			LeaveCriticalSection(&cs);
 		}
 	private:
+		int count;
 		CRITICAL_SECTION cs;
 		int64_t val;
 	};
+
+	int seteventscount = 0;
+	CRITICAL_SECTION cs;
 	void FolderSize(LPVOID poolarg, LPVOID vectargs)
 	{
 		ThreadPool* pool =(ThreadPool*) poolarg;
 		std::vector<LPVOID>* vect = (std::vector<LPVOID>*) vectargs;
+		if (vect->size() != 3)
+		{
+			printf("WRONGWRONGWRONGWRONGWRONGWRONG\n");
+		}
 		WIN32_FIND_DATAW wfd;
 		std::wstring* pdir = (std::wstring*) vect->at(0);
 		std::wstring dir = *pdir;
@@ -210,8 +221,11 @@ extern "C"
 		}
 		HANDLE eventik = (HANDLE) vect->at(2);
 		SetEvent(eventik);
-		delete pdir;
-		delete vect;
+		EnterCriticalSection(&cs);
+		seteventscount++;
+		LeaveCriticalSection(&cs);
+		//delete pdir;
+		//delete vect;
 	}
 	#pragma warning(disable : 4996)
 	void FolderWalker(LPVOID poolarg, LPVOID vectargs)
@@ -272,23 +286,23 @@ extern "C"
 			FindClose(hFind);
 			if (*(int*)vect[3] == 1)//корневая папка
 			{
-				Sleep(1000);
 				HANDLE vas;
 				for (int i = 0; i< allevents->size(); i++)
 				{
 					vas = allevents->at(i);
-					::WaitForSingleObject(vas,INFINITE);//ВОТ ТУТ ОШИБКА!
+					::WaitForSingleObject(vas,1);//ВОТ ТУТ ОШИБКА!
 				}
 			}
 		}
 	}
 	void __declspec(dllexport) Size(LPVOID poolarg, LPVOID vectargs)
 	{
+		InitializeCriticalSection(&cs);
 		ThreadPool* pool =(ThreadPool*) poolarg;
 		std::vector<std::wstring>* vect = (std::vector<std::wstring>*) vectargs;
 		if (vect->size() != 1)
 		{
-			printf("Size:Unacceptable params!\n)");
+			printf("Size:Unacceptable params!\n");
 			return;
 		}
 		std::vector<LPVOID> mainvect =  std::vector<LPVOID>();

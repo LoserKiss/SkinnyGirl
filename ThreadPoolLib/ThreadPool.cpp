@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ThreadPool.h"
+
 
 
 ThreadPool::ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime)
@@ -33,7 +33,7 @@ void ThreadPool::thread_manager_fn(LPVOID param)
 	while(pool->active)
 	{
 		isallwork = false;
-		Sleep(100);//плохое решение
+		Sleep(20);//плохое решение
 		//::WaitForSingleObject(pool->notNullTasksQueueEvent,INFINITE);
 		while (!isallwork)
 		{
@@ -109,7 +109,7 @@ void ThreadPool::AddTask(DLLFUNC fn, LPVOID params)
 }
 
 
-int ThreadPool::WorkersCount(int* working, int* resting)
+int ThreadPool::WorkersCount(int* working, int* resting, int* itasks)
 {
 	int result = 0;
 	EnterCriticalSection(&workerscs);
@@ -119,6 +119,9 @@ int ThreadPool::WorkersCount(int* working, int* resting)
 	*working = result;
 	*resting = workers.size() - result;
 	LeaveCriticalSection(&workerscs);
+	EnterCriticalSection(&taskscs);
+	*itasks = this->tasks.size();
+	LeaveCriticalSection(&taskscs);
 	return *working + *resting;
 }
 

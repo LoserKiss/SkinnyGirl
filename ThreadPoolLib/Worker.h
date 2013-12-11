@@ -13,7 +13,7 @@ public:
 		awaker = ::CreateEvent(NULL,FALSE,//ס אגעמסבנמסמל
 			FALSE,NULL);
 		finishtask = ::CreateEvent(NULL,FALSE,//ס אגעמסבנמסמל
-			FALSE,NULL);
+			TRUE,NULL);
 	}
     ~Worker()
     {

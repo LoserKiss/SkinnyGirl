@@ -8,7 +8,7 @@ public:
     ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime);
     ~ThreadPool() ;
 	void AddTask(DLLFUNC fn, LPVOID params);
-	int WorkersCount(int* working, int* resting);
+	int WorkersCount(int* working, int* resting, int* tasks);
 private:
 	bool active;
 	size_t minthreads;
