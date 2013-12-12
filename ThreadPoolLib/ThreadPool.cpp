@@ -13,7 +13,7 @@ ThreadPool::ThreadPool(size_t _minthreads, size_t _maxthreads, size_t _lifetime)
 	thr_deleter_fn_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_deleter_fn, (LPVOID)this, 0, NULL);
 	thr_manager_fn_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_manager_fn, (LPVOID)this, 0, NULL);
 	//notNullTasksQueueEvent = ::CreateEvent(NULL,TRUE,//без
-		//FALSE,NULL);
+	//	TRUE,NULL);
 }
 
 ThreadPool::~ThreadPool(void)
@@ -32,49 +32,46 @@ void ThreadPool::thread_manager_fn(LPVOID param)
 	fn_type task;
 	while(pool->active)
 	{
+		Sleep(20);
 		isallwork = false;
-		Sleep(20);//плохое решение
+		//Sleep(100);
 		//::WaitForSingleObject(pool->notNullTasksQueueEvent,INFINITE);
-		while (!isallwork)
+		EnterCriticalSection(&pool->taskscs);
+		EnterCriticalSection(&pool->workerscs);
+		for (int i = 0; i< pool->workers.size(); i++)
 		{
-			EnterCriticalSection(&pool->taskscs);
-			if (pool->tasks.empty())
+			if (!pool->workers[i]->IsWorking())
 			{
-				isallwork = true;
-				//ResetEvent(pool->notNullTasksQueueEvent);
-				LeaveCriticalSection(&pool->taskscs);
-				break;
-			}
-			//LeaveCriticalSection(&pool->taskscs);
-			//EnterCriticalSection(&pool->taskscs);
-			task = pool->tasks.front();
-			pool->tasks.pop();
-			if (pool->tasks.size() == 0)
-			{
-				//ResetEvent(pool->notNullTasksQueueEvent);
-			}
-			LeaveCriticalSection(&pool->taskscs);
-			EnterCriticalSection(&pool->workerscs);
-			foundfreeworker = false;
-			for(int i = 0; i< pool->workers.size(); i++)
-			{
-				if (!pool->workers[i]->IsWorking())
+				if (!pool->tasks.empty())
 				{
-					foundfreeworker = true;
+					task = pool->tasks.front();
+					pool->tasks.pop();
 					pool->workers[i]->GiveTask(task);
+				}
+				else
+				{
 					break;
 				}
 			}
-			if (!foundfreeworker)
-			{
-				if (pool->workers.size() < pool->maxthreads)
-				{
-					pool->workers.push_back( new Worker());
-					pool->workers.back()->GiveTask(task);
-				}
-			}
-			LeaveCriticalSection(&pool->workerscs);
 		}
+		LeaveCriticalSection(&pool->taskscs);
+		EnterCriticalSection(&pool->taskscs);
+		while (pool->workers.size() < pool->maxthreads)
+		{
+			if (!pool->tasks.empty())
+			{
+				task = pool->tasks.front();
+				pool->tasks.pop();
+				pool->workers.push_back(new Worker());
+				pool->workers.back()->GiveTask(task);
+			}
+			else
+			{
+				break;
+			}
+		}
+		LeaveCriticalSection(&pool->workerscs);
+		LeaveCriticalSection(&pool->taskscs);
 	}
 }
 
@@ -102,9 +99,13 @@ void ThreadPool::thread_deleter_fn(LPVOID param)
 
 void ThreadPool::AddTask(DLLFUNC fn, LPVOID params)
 {
+	//bool isempty;
 	EnterCriticalSection(&taskscs);
+	//isempty = tasks.empty();
 	std::function<void()> f = std::function<void()>(std::bind(fn,(LPVOID)this,(LPVOID) params));
 	tasks.push(f);
+	//if (isempty)
+	//	SetEvent(notNullTasksQueueEvent);
 	LeaveCriticalSection(&taskscs);
 }
 

@@ -83,6 +83,11 @@ extern "C"
 		dirTo += folderName;
 		dirTo+= L"/";
 		HANDLE  hFind = FindFirstFileW(dirFrom.data(), &wfd);
+		std::wstring fullFileName;
+		std::wstring fullNewFileName;
+		fullNewFileName.clear();
+		fullNewFileName+= dirTo;
+		CreateDirectory(fullNewFileName.data(),NULL);
 		std::vector<std::wstring> vasya;
 		std::wstring* newPathTo;
 		std::wstring* newPathFrom;
@@ -118,11 +123,6 @@ extern "C"
 				
 			} while (NULL != FindNextFileW(hFind, &wfd));
 			FindClose(hFind);
-			std::wstring fullFileName;
-			std::wstring fullNewFileName;
-			fullNewFileName.clear();
-			fullNewFileName+= dirTo;
-			CreateDirectory(fullNewFileName.data(),NULL);
 			for (int i = 0; i< vasya.size(); i++)
 			{
 				fullFileName.clear();
@@ -133,11 +133,7 @@ extern "C"
 				fullNewFileName+= dirTo;
 				fullNewFileName+=vasya[i];
 				int err = CopyFile(fullFileName.data(),fullNewFileName.data(),FALSE);
-				if (err != 0)
-				{
-					std::wcout << L"Successfully copied "<<fullFileName.data()<<L"\n"<<std::endl;
-				}
-				else
+				if (err == 0)
 				{
 					std::wcout << L"Failed to copy "<<fullFileName.data()<<L"\n"<<std::endl;
 				}
@@ -179,12 +175,12 @@ extern "C"
 			count++;
 			LeaveCriticalSection(&cs);
 		}
-	private:
 		int count;
+	private:
+		
 		CRITICAL_SECTION cs;
 		int64_t val;
 	};
-
 	void FolderSize(LPVOID poolarg, LPVOID vectargs)
 	{
 		ThreadPool* pool =(ThreadPool*) poolarg;
@@ -210,7 +206,9 @@ extern "C"
 				if (!wcscmp(wfd.cFileName,L".") || !wcscmp(wfd.cFileName,L".."))
 					 continue;
 				if ((vas = wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+				{
 					folderFilesSize += (wfd.nFileSizeHigh * (MAXDWORD+1)) + wfd.nFileSizeLow;
+				}
 			} while (NULL != FindNextFileW(hFind, &wfd));
 			FindClose(hFind);
 			DefendedInt64* vasya;
@@ -285,8 +283,9 @@ extern "C"
 				for (int i = 0; i< allevents->size(); i++)
 				{
 					vas = allevents->at(i);
-					::WaitForSingleObject(vas,1);//бнр рср ньхайю!
+					::WaitForSingleObject(vas,INFINITE);
 				}
+				Sleep(100);
 			}
 		}
 	}

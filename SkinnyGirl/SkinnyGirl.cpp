@@ -72,6 +72,11 @@ int main(int argc, char *argv[])// min max lifetime
 			Exit(&pool);
 			break;
 		}
+		if (!strcmp(command,"Status"))
+		{
+			man.GetFuncAdress(L"Status")(pool,&std::vector<std::wstring>());
+			continue;
+		}
 		vParsedString = new std::vector<std::wstring>();
 		split(strcommand, *vParsedString,' ');
 		if ((vParsedString->size() == 1) &&(!wcscmp(vParsedString->at(0).data(),L"")))

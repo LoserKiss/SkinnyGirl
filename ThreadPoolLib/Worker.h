@@ -19,6 +19,8 @@ public:
     {
 		EnterCriticalSection(&cs);
 		enabled = false;
+		if (isworking)
+			printf("VAXVAXVAX\n");
 		isworking = false;
 		LeaveCriticalSection(&cs);
 		SetEvent(awaker);
@@ -88,6 +90,7 @@ private:
 					return;
 				}
 				ths->isworking = true;
+				ths->lasttime = GetTickCount64();
 				ResetEvent(ths->finishtask);
 			LeaveCriticalSection(&ths->cs);
 			if (ths->task_field != NULL)
